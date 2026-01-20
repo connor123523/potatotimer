@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}タイムライン{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">タイムライン</h1>
+
+<p>
+  <a href="{% url 'post_create' %}" class="btn btn-primary">新規投稿</a>
+</p>
+
+{# 有搜索词时，显示「xxx 的搜索结果：n件」 #}
+{% if q %}
+  <p class="text-muted">「{{ q }}」の検索結果: {{ posts|length }} 件</p>
+{% endif %}
+
+{% if posts %}
+  {% for post in posts %}
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">{{ post.author.username }}</h5>
+        <p class="card-text">{{ post.content }}</p>
+        <p class="card-text">
+          <small class="text-muted">{{ post.created_at }}</small>
+        </p>
+        <a href="{% url 'post_detail' post.pk %}"
+           class="btn btn-sm btn-outline-primary">
+          続きを読む
+        </a>
+      </div>
+    </div>
+  {% endfor %}
+{% else %}
+  <p class="text-muted">検索結果はありません。</p>
+{% endif %}
+{% endblock %}
