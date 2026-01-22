@@ -1,16 +1,22 @@
 from pathlib import Path
 import os
+from dotenv import load_dotenv  # ★ 新增：加载 .env 用
 
+# BASE_DIR 指向 devProject2 这个目录
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# ★ 在项目启动时，从 devProject2/.env 读取环境变量
+load_dotenv(BASE_DIR / ".env")
 
 # =========================
 # 基本設定
 # =========================
+# .env に SECRET_KEY, DEBUG を書いておく
 SECRET_KEY = os.environ.get("SECRET_KEY", "change-me-in-production")
 
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ["*"]  # Render 部署前先用星号，之后我会教你改真实域名
+ALLOWED_HOSTS = ["*"]  # Render 部署前先用星号
 
 # =========================
 # アプリケーション設定
