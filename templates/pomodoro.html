@@ -153,15 +153,42 @@ const audioEl = document.getElementById("ambient-audio");
 const soundNow = document.getElementById("sound-now");
 
 async function loadSound(tag) {
-  const res = await fetch(`/api/sound/?tag=${encodeURIComponent(tag)}`);
-  const data = await res.json();
-  if (!res.ok) {
-    alert(data.error || "音の取得に失敗しました");
-    return;
+  try {
+    const res = await fetch(`/api/sound/?tag=${encodeURIComponent(tag)}`);
+    let data = {};
+    try {
+      data = await res.json();
+    } catch (e) {
+      console.warn("api/sound JSON parse error:", e);
+    }
+
+    if (!res.ok) {
+      // エラー内容と detail を両方表示（Render上の原因を見るため）
+      const msg = (data.error || "音の取得に失敗しました") +
+                  (data.detail ? "\n\nDETAIL: " + data.detail : "");
+      alert(msg);
+      console.error("api/sound error:", res.status, data);
+      return;
+    }
+
+    if (!data.mp3Url) {
+      alert("サウンドURLが取得できませんでした");
+      console.error("bad freesound data:", data);
+      return;
+    }
+
+    audioEl.src = data.mp3Url;
+    soundNow.textContent = `${data.name || "unknown"} (${data.tag || tag})`;
+
+    try {
+      await audioEl.play();
+    } catch (e) {
+      console.warn("autoplay failed:", e);
+    }
+  } catch (e) {
+    alert("Network error: " + e);
+    console.error("loadSound exception:", e);
   }
-  audioEl.src = data.mp3Url;
-  soundNow.textContent = `${data.name} (${data.tag})`;
-  try { await audioEl.play(); } catch {}
 }
 
 document.getElementById("sound-load").onclick =
@@ -170,6 +197,7 @@ document.getElementById("sound-load").onclick =
 document.getElementById("sound-toggle").onclick =
   () => audioEl.paused ? audioEl.play() : audioEl.pause();
 
+// 初期状態で rain を試す
 loadSound("rain");
 
 /* =========================
@@ -251,3 +279,4 @@ listEl.onclick = async (e) => {
 refreshTasks();
 </script>
 {% endblock %}
+
